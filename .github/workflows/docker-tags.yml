@@ -1,0 +1,38 @@
+name: Publish Docker image tags
+
+on:
+  push:
+    tags:
+      - '*'
+env:
+  ALIYUN_REGISTRY: "${{ secrets.ALIYUN_REGISTRY }}"
+  ALIYUN_NAME_SPACE: "${{ secrets.ALIYUN_NAME_SPACE }}"
+  ALIYUN_REGISTRY_USER: "${{ secrets.ALIYUN_REGISTRY_USER }}"
+  ALIYUN_REGISTRY_PASSWORD: "${{ secrets.ALIYUN_REGISTRY_PASSWORD }}"
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      # 制作docker镜像并推送到阿里云容器镜像服务
+      - name: build and push docker image
+        run: |
+          # 登录阿里云
+          docker login -u $ALIYUN_REGISTRY_USER -p $ALIYUN_REGISTRY_PASSWORD $ALIYUN_REGISTRY
+          echo "登录阿里云成功"
+          
+          docker image build -t ${{ vars.APP_NAME }}:latest .
+          echo "构建镜像成功"
+          docker images
+          docker tag ${{ vars.APP_NAME }} $ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/${{ vars.APP_NAME }}:latest
+          echo "docker tag "
+          docker push $ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/${{ vars.APP_NAME }}:latest
+          echo "docker push "
+          docker logout
+          echo "app name ${{ vars.REGISTRY_MIRROR }}"
+
+          
