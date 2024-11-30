@@ -16,7 +16,10 @@ import re
 import json
 from time import sleep
 
+import requests
+
 from util.webRequest import WebRequest
+from datetime import date, datetime, timedelta
 
 
 class ProxyFetcher(object):
@@ -167,6 +170,20 @@ class ProxyFetcher(object):
         try:
             for each in r.json['data']:
                 yield each['ip']
+        except Exception as e:
+            print(e)
+
+    @staticmethod
+    def freeProxy12():
+        """ checkerproxy  https://checkerproxy.net/api/archive/2024-01-01 """
+        yesterday = (date.today() - timedelta(days=1)).strftime('%Y-%m-%d')
+        proxy_url = f'https://checkerproxy.net/api/archive/{yesterday}'
+        print(f'\ngetting proxies from {proxy_url} ...')
+        proxies_json = requests.get(proxy_url).json()
+        try:
+            print(f'successfully get {len(proxies_json)} proxies')
+            for proxy in proxies_json:
+                yield proxy['addr']
         except Exception as e:
             print(e)
 
